@@ -13,6 +13,7 @@ python checkup.py https://example.com --no-lighthouse
 Open the `review.html` path printed by the scanner. By default it is saved under `out/<site>/<YYYY-MM-DD>/` next to the script. The folder also holds `findings.json` and, when the scanner has a confident finding, `outreach-draft.txt`.
 
 The scan requests web pages and checks links. It uses Google Public DNS for mail records and sends selected page URLs to Google PageSpeed Insights when Lighthouse is enabled.
+
 ![The review page, showing scanner findings with keep and leave-out buttons](docs/screenshot.png)
 
 Options:
