@@ -1,6 +1,6 @@
 # Site Usability Review
 
-Review a small business website for usability issues that affect older customers. The scanner creates an interactive review page where you can verify findings, add hands-on observations, and export a plain-English client report.
+Review a small business website for usability issues that affect older customers. Make the web better for seniors!
 
 ## Quick start
 
@@ -89,5 +89,5 @@ All finding text lives in the `KB` table near the top of `checkup.py`. The hands
 
 ## License
 
-The project code is available under the [MIT License](LICENSE).
+Everything in this repository, including the scanner, the review page template, the finding wording and the documentation, is available under the [MIT License](LICENSE).
 
