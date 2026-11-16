@@ -32,7 +32,7 @@ from html.parser import HTMLParser
 from pathlib import Path
 
 VERSION = "0.3"
-UA = "site-usability-review/" + VERSION + " (low-volume manual review tool)"
+UA = "site-usability-review/" + VERSION + " (low-volume manual review tool; +https://github.com/trevinp/site-usability-review)"
 TIMEOUT = 20
 HERE = Path(__file__).resolve().parent
 
