@@ -1,0 +1,8 @@
+/out/
+/guidelines/
+__pycache__/
+*.py[cod]
+/.venv/
+.env
+.env.*
+/prospects.txt

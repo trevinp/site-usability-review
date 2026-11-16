@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Site usability review</title>
+<style id="css-shared">
+  :root { --ink:#16212b; --soft:#46535f; --paper:#fbfaf7; --card:#fff; --line:#dcd9d1; --brand:#0b5c63; --brand-dark:#08454a;
+          --tint:#e4f1f1; --call:#fdf3dc; --call-ink:#6b4a00; --call-line:#d9a520; --ok:#e3f1e6; --ok-ink:#1d5a2c; --mark:#c2410c; }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--paper); color:var(--ink); font:17px/1.55 "Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif; }
+  .wrap { max-width:880px; margin:0 auto; padding:0 20px 80px; }
+  h1 { font-size:1.9rem; line-height:1.2; margin:28px 0 6px; }
+  h2 { font-size:1.4rem; margin:40px 0 6px; }
+  h3 { font-size:1.12rem; margin:0 0 6px; }
+  p { margin:0 0 12px; }
+  ul.ev { margin:4px 0 0; padding-left:1.2em; color:var(--soft); font-size:.95rem; word-break:break-word; }
+  .swatch { display:inline-block; width:.95em; height:.95em; border:1px solid #777; border-radius:3px; vertical-align:-2px; margin:0 3px 0 4px; }
+  figure.shot { margin:12px 0 4px; max-width:100%; }
+  figure.shot .frame { position:relative; overflow:hidden; border:1px solid var(--line); border-radius:8px; background:#fff; max-width:100%; }
+  figure.shot img { position:absolute; left:0; display:block; }
+  figure.shot .hl { position:absolute; border:3px solid var(--mark); border-radius:4px; box-shadow:0 0 0 2px #fff; }
+  figure.shot figcaption { font-size:.9rem; color:var(--soft); margin-top:4px; }
+  #client h2 { border-bottom:2px solid var(--brand); padding-bottom:4px; }
+  #client .finding { padding:16px 0; border-bottom:1px solid var(--line); break-inside:avoid; }
+  #client .imp { font-weight:700; font-size:.9rem; padding:2px 10px; border-radius:999px; background:var(--tint); color:var(--brand-dark); }
+  #client .imp.high { background:var(--call); color:var(--call-ink); }
+  #client .quote { white-space:pre-wrap; }
+  #client .small { font-size:.95rem; color:var(--soft); }
+  @media print { body { background:#fff; font-size:12pt; } .wrap { max-width:none; padding:0; } }
+</style>
+<style>
+  .muted { color:var(--soft); }
+  button, select, input, textarea { font:inherit; color:inherit; }
+  :focus-visible { outline:3px solid var(--ink); outline-offset:2px; }
+  .bar { position:sticky; top:0; z-index:5; background:var(--card); border-bottom:1px solid var(--line); }
+  .bar-in { max-width:880px; margin:0 auto; padding:10px 20px; display:flex; flex-wrap:wrap; gap:8px; align-items:center; }
+  .bar strong { margin-right:auto; }
+  .btn { border:2px solid var(--brand); background:var(--card); color:var(--brand); font-weight:600; padding:7px 14px; border-radius:8px; cursor:pointer; }
+  .btn:hover { background:var(--tint); }
+  .btn.on, .btn.primary { background:var(--brand); color:#fff; }
+  .btn.quiet { border-color:var(--line); color:var(--soft); font-weight:400; }
+  .pill { padding:6px 12px; border-radius:999px; font-weight:600; border:0; cursor:pointer; }
+  .pill.todo { background:var(--call); color:var(--call-ink); }
+  .pill.done { background:var(--ok); color:var(--ok-ink); }
+  #barmsg { flex-basis:100%; color:var(--call-ink); font-weight:600; }
+  #barmsg:empty { display:none; }
+  .box { background:var(--card); border:1px solid var(--line); border-radius:10px; padding:18px 20px; margin:14px 0; }
+  .box.call { background:var(--call); border-color:var(--call-line); }
+  .card { background:var(--card); border:1px solid var(--line); border-left:6px solid var(--line); border-radius:10px; padding:18px 20px; margin:14px 0; }
+  .card.pending { border-left-color:var(--call-line); }
+  .card.kept { border-left-color:var(--brand); }
+  .card.dropped { opacity:.6; }
+  .tag { display:inline-block; font-size:.85rem; font-weight:700; padding:2px 10px; border-radius:999px; margin:0 8px 8px 0; }
+  .tag.conf { background:var(--ok); color:var(--ok-ink); }
+  .tag.call { background:var(--call); color:var(--call-ink); }
+  .tag.plain { background:#eeece6; color:var(--soft); }
+  .tag.new { background:var(--tint); color:var(--brand-dark); }
+  .lbl { font-size:.85rem; font-weight:700; text-transform:uppercase; letter-spacing:.05em; color:var(--soft); margin:12px 0 2px; }
+  [contenteditable] { border:1px dashed transparent; border-radius:6px; padding:2px 6px; margin-left:-6px; min-height:1.6em; }
+  [contenteditable]:hover, [contenteditable]:focus { border-color:var(--brand); background:#fff; }
+  [contenteditable]:empty::before { content:"Write this in plain English…"; color:var(--call-ink); }
+  .yourcall { background:var(--call); border-left:5px solid var(--call-line); border-radius:0 8px 8px 0; padding:10px 14px; margin:12px 0; }
+  .yourcall b { color:var(--call-ink); }
+  .row { display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin-top:14px; }
+  textarea, input[type=text] { width:100%; border:1px solid var(--line); border-radius:8px; padding:9px 11px; background:#fff; }
+  textarea { min-height:90px; resize:vertical; }
+  textarea.tall { min-height:300px; }
+  label.field { display:block; font-weight:600; margin:14px 0 4px; }
+  .tiles { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:10px; }
+  .tile { background:var(--card); border:1px solid var(--line); border-radius:10px; padding:12px 14px; }
+  .tile b { display:block; font-size:1.5rem; }
+  ol.steps li { margin-bottom:6px; }
+  table.lh { border-collapse:collapse; width:100%; font-size:.95rem; }
+  table.lh th, table.lh td { text-align:left; padding:6px 10px 6px 0; border-bottom:1px solid var(--line); }
+  body.client-mode #review, body:not(.client-mode) #client { display:none; }
+  @media print { .bar { display:none; } #review { display:none !important; } }
+</style>
+</head>
+<body>
+<div class="bar">
+  <div class="bar-in">
+    <strong id="barsite">Site usability review</strong>
+    <button class="pill" id="progress" type="button"></button>
+    <button class="btn" id="b-review" type="button">Review</button>
+    <button class="btn" id="b-client" type="button">Client report</button>
+    <button class="btn primary" id="b-print" type="button">Print or save as PDF</button>
+    <button class="btn" id="b-download" type="button">Download report</button>
+    <div id="barmsg" role="status"></div>
+  </div>
+</div>
+<div class="wrap">
+  <main id="review"></main>
+  <main id="client"></main>
+</div>
+<input type="file" id="loadfile" accept="application/json,.json" hidden>
+
+<script id="data" type="application/json">/*__DATA__*/null</script>
+<script>
+(function () {
+  var DATA;
+  try { DATA = JSON.parse(document.getElementById('data').textContent); } catch (e) { DATA = null; }
+  if (!DATA) { document.getElementById('review').textContent = 'This is the blank template. Run checkup.py to create a review page.'; return; }
+
+  var META = DATA.meta, KEY = 'checkup:' + META.host + ':' + META.stamp;
+  var SHOTS = DATA.shots || {}, CMP = DATA.compare || null;
+  var IMP = { high: 'Fix first', med: 'Worth fixing', low: 'Nice to have' };
+  var SRC = { scan: 'page scan', lighthouse: 'Google Lighthouse', both: 'page scan and Google Lighthouse (two independent checks)' };
+  var TEXT = ['title', 'why', 'fix'];
+  var BLANK = { f: {}, m: {}, summary: '', summaryOk: false, quote: '', by: '', contact: '', hideFixed: {} };
+  var S = JSON.parse(JSON.stringify(BLANK));
+  var BYID = {}; DATA.findings.forEach(function (f) { BYID[f.id] = f; });
+
+  // Only what you changed is saved. Anything you have not touched always shows the scanner's current wording.
+  function defaultOf(f, k) { return k === 'decision' ? (f.confidence === 'confirmed' ? 'keep' : null) : k === 'severity' ? f.severity : f[k]; }
+  function tidy() {
+    Object.keys(S.f).forEach(function (id) {
+      var f = BYID[id], o = S.f[id];
+      if (!f || !o) { delete S.f[id]; return; }
+      Object.keys(o).forEach(function (k) { if (o[k] === defaultOf(f, k)) delete o[k]; });
+      if (!Object.keys(o).length) delete S.f[id];
+    });
+    if (!S.hideFixed) S.hideFixed = {};
+  }
+  function adopt(obj) { S = Object.assign(JSON.parse(JSON.stringify(BLANK)), obj || {}); tidy(); }
+  try { adopt(JSON.parse(localStorage.getItem(KEY))); } catch (e) {}
+  function save() { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} updateProgress(); }
+
+  function fget(f, k) { var o = S.f[f.id]; return o && (k in o) ? o[k] : defaultOf(f, k); }
+  function fset(f, k, v) {
+    var o = S.f[f.id] || (S.f[f.id] = {});
+    if (v === defaultOf(f, k)) delete o[k]; else o[k] = v;
+    if (!Object.keys(o).length) delete S.f[f.id];
+    save();
+  }
+  function edited(f) { var o = S.f[f.id] || {}; return TEXT.some(function (k) { return k in o; }); }
+  function ms(m) { if (!S.m[m.id]) S.m[m.id] = { result: null, note: '' }; return S.m[m.id]; }
+
+  function el(tag, props) {
+    var n = document.createElement(tag), i, c;
+    for (var k in (props || {})) {
+      if (k === 'text') n.textContent = props[k];
+      else if (k.slice(0, 2) === 'on') n.addEventListener(k.slice(2), props[k]);
+      else if (props[k] !== false && props[k] != null) n.setAttribute(k, props[k]);
+    }
+    for (i = 2; i < arguments.length; i++) { c = arguments[i]; if (c == null || c === false) continue; n.appendChild(typeof c === 'string' ? document.createTextNode(c) : c); }
+    return n;
+  }
+  // A list. Any colour code in the text gets a small swatch beside it.
+  function list(items, cls) {
+    var u = el('ul', { class: cls || '' });
+    items.forEach(function (t) {
+      var li = el('li'), last = 0, re = /#[0-9a-fA-F]{6}\b/g, m;
+      while ((m = re.exec(t))) {
+        li.appendChild(document.createTextNode(t.slice(last, m.index + 7)));
+        li.appendChild(el('span', { class: 'swatch', style: 'background:' + m[0], 'aria-hidden': 'true' }));
+        last = m.index + 7;
+      }
+      li.appendChild(document.createTextNode(t.slice(last)));
+      u.appendChild(li);
+    });
+    return u;
+  }
+  // A crop of the page screenshot with the problem outlined.
+  function shotEl(sh) {
+    var shot = SHOTS[sh.page]; if (!shot || !shot.w) return null;
+    var W = 340, H = 200, imgH = (shot.h || 0) * W / shot.w, s = W / (shot.cw || shot.w), r = sh.rect;
+    var frameH = imgH ? Math.min(H, imgH) : H;
+    var off = Math.max(0, Math.min((r.top + r.height / 2) * s - frameH / 2, Math.max(0, imgH - frameH)));
+    var frame = el('div', { class: 'frame', style: 'width:' + W + 'px;height:' + frameH + 'px' },
+      el('img', { src: shot.data, alt: '', style: 'top:' + (-off) + 'px;width:' + W + 'px' }),
+      el('div', { class: 'hl', style: 'left:' + (r.left * s - 4) + 'px;top:' + (r.top * s - off - 4) + 'px;width:' + (r.width * s + 8) + 'px;height:' + (r.height * s + 8) + 'px' }));
+    return el('figure', { class: 'shot' }, frame, el('figcaption', { text: 'Outlined on ' + sh.page + (sh.label ? ': ' + sh.label.slice(0, 60) : '') }));
+  }
+  function saveFile(name, text, type) {
+    var a = el('a', { href: URL.createObjectURL(new Blob([text], { type: type })), download: name });
+    document.body.appendChild(a); a.click(); a.remove();
+  }
+  function say(t) { document.getElementById('barmsg').textContent = t; }
+
+  // ---- what still needs a decision ---------------------------------------
+  function findingPending(f) {
+    var d = fget(f, 'decision');
+    return d === null || (d === 'keep' && TEXT.some(function (k) { return !fget(f, k).trim(); }));
+  }
+  function manualPending(m) { var s = ms(m); return s.result === null || (s.result === 'problem' && !s.note.trim()); }
+  function pendingCount() {
+    return DATA.findings.filter(findingPending).length + DATA.manual.filter(manualPending).length + (S.summaryOk && S.summary.trim() ? 0 : 1);
+  }
+  function updateProgress() {
+    var n = pendingCount(), p = document.getElementById('progress');
+    p.textContent = n ? n + ' decision' + (n === 1 ? '' : 's') + ' left' : 'All decisions made';
+    p.className = 'pill ' + (n ? 'todo' : 'done');
+  }
+
+  // ---- everything that goes in the client report -------------------------
+  function keptFindings() {
+    var out = [], o = { high: 0, med: 1, low: 2 };
+    DATA.findings.forEach(function (f) {
+      if (fget(f, 'decision') === 'keep') out.push({ area: f.area, title: fget(f, 'title'), why: fget(f, 'why'), fix: fget(f, 'fix'), severity: fget(f, 'severity'),
+        evidence: f.evidence.slice(0, 3), shots: (f.shots || []).slice(0, 1), confident: f.confidence === 'confirmed' });
+    });
+    DATA.manual.forEach(function (m) {
+      var s = ms(m);
+      if (s.result === 'problem') out.push({ area: m.problem.area, title: m.problem.title, why: m.problem.why, fix: m.problem.fix, severity: m.problem.severity,
+        evidence: s.note.trim() ? [s.note.trim()] : [], shots: [], confident: false });
+    });
+    return out.sort(function (a, b) { return o[a.severity] - o[b.severity]; });
+  }
+  function draftSummary() {
+    var k = keptFindings(), h = k.filter(function (f) { return f.severity === 'high'; }).length;
+    return 'I reviewed ' + META.host + ' on ' + META.date + ', looking at how easy it is to use for older customers and for anyone with weaker eyesight or less steady hands. ' +
+      'I found ' + k.length + ' thing' + (k.length === 1 ? '' : 's') + ' worth fixing' + (h ? ', and I would start with ' + h + ' of them' : '') + '. ' +
+      (DATA.positives.length ? 'A good deal is already working well, and I have listed that too.' : '');
+  }
+  function outreachDraft() {
+    var f = keptFindings().filter(function (x) { return x.confident; })[0];
+    if (!f) return '';
+    var t = f.title.charAt(0).toLowerCase() + f.title.slice(1).replace(/\.$/, '');
+    return (META.outreach_template || '').replace('{HOST}', META.host).replace('{TITLE}', t).replace('{WHY}', f.why).replace('{FIX}', f.fix)
+      .replace('{EVIDENCE}', f.evidence.length ? '\nFor example: ' + f.evidence[0] + '\n' : '');
+  }
+
+  // ---- REVIEW MODE --------------------------------------------------------
+  function editable(tag, f, k) {
+    return el(tag, { contenteditable: 'true', spellcheck: 'true', text: fget(f, k), oninput: function (e) { fset(f, k, e.target.textContent); } });
+  }
+  function choice(label, on, fn) { return el('button', { type: 'button', class: 'btn' + (on ? ' on' : ''), 'aria-pressed': on ? 'true' : 'false', text: label, onclick: fn }); }
+
+  function findingCard(f) {
+    var d = fget(f, 'decision'), pend = findingPending(f), conf = f.confidence === 'confirmed';
+    var card = el('div', { class: 'card ' + (pend ? 'pending' : d === 'keep' ? 'kept' : 'dropped'), 'data-pending': pend ? '1' : null });
+    card.appendChild(el('span', { class: 'tag ' + (conf ? 'conf' : 'call'), text: conf ? 'Scanner is confident' : 'Your call: verify first' }));
+    card.appendChild(el('span', { class: 'tag plain', text: f.area }));
+    if (CMP) card.appendChild(el('span', { class: 'tag new', text: CMP.new.indexOf(f.id) >= 0 ? 'New since ' + CMP.since : 'Also found on ' + CMP.since }));
+    card.appendChild(editable('h3', f, 'title'));
+    card.appendChild(el('div', { class: 'lbl', text: 'Why it matters' })); card.appendChild(editable('p', f, 'why'));
+    card.appendChild(el('div', { class: 'lbl', text: 'How to fix it' })); card.appendChild(editable('p', f, 'fix'));
+    if (f.evidence.length) { card.appendChild(el('div', { class: 'lbl', text: 'What the scanner saw' })); card.appendChild(list(f.evidence, 'ev')); }
+    (f.shots || []).slice(0, 2).forEach(function (sh) { var s = shotEl(sh); if (s) card.appendChild(s); });
+    card.appendChild(el('p', { class: 'muted', style: 'margin-top:8px', text: 'Found by: ' + (SRC[f.source] || f.source) + '.' }));
+    if (f.check_how) card.appendChild(el('div', { class: 'yourcall' }, el('b', { text: conf ? 'Quick check: ' : 'Your call: ' }), f.check_how));
+    var sel = el('select', { 'aria-label': 'Importance', onchange: function (e) { fset(f, 'severity', e.target.value); } });
+    ['high', 'med', 'low'].forEach(function (v) { var o = el('option', { value: v, text: IMP[v] }); if (fget(f, 'severity') === v) o.selected = true; sel.appendChild(o); });
+    card.appendChild(el('div', { class: 'row' },
+      choice(conf ? 'Keep in report' : 'I checked: include it', d === 'keep', function () { fset(f, 'decision', 'keep'); renderReview(); }),
+      choice(conf ? 'Leave out' : 'Not a real problem: leave out', d === 'drop', function () { fset(f, 'decision', 'drop'); renderReview(); }),
+      el('span', { class: 'muted', text: 'Importance:' }), sel,
+      edited(f) ? el('button', { type: 'button', class: 'btn quiet', text: 'Restore scanner wording', onclick: function () { TEXT.forEach(function (k) { fset(f, k, f[k]); }); renderReview(); } }) : null));
+    if (d === 'keep' && pend) card.appendChild(el('p', { style: 'color:var(--call-ink);font-weight:600;margin:10px 0 0', text: 'Fill in the title, why and fix before this can go in the report.' }));
+    return card;
+  }
+
+  function manualCard(m) {
+    var s = ms(m), pend = manualPending(m);
+    var card = el('div', { class: 'card ' + (pend ? 'pending' : 'kept'), 'data-pending': pend ? '1' : null });
+    card.appendChild(el('span', { class: 'tag call', text: 'Only you can do this' }));
+    card.appendChild(el('h3', { text: m.title }));
+    card.appendChild(el('p', { text: m.how }));
+    function set(v) { return function () { s.result = v; save(); renderReview(); }; }
+    card.appendChild(el('div', { class: 'row' },
+      choice('No problem', s.result === 'pass', set('pass')),
+      choice('Problem found', s.result === 'problem', set('problem')),
+      choice('Did not check', s.result === 'skip', set('skip'))));
+    if (s.result === 'problem') {
+      card.appendChild(el('label', { class: 'field', for: 'n-' + m.id, text: 'What you saw (this goes in the report under "' + m.problem.title + '")' }));
+      var t = el('textarea', { id: 'n-' + m.id, oninput: function (e) { s.note = e.target.value; save(); } }); t.value = s.note; card.appendChild(t);
+    }
+    if (s.result === 'skip') card.appendChild(el('p', { class: 'muted', style: 'margin:10px 0 0', text: 'The report will list this under "Not covered".' }));
+    return card;
+  }
+
+  function renderReview() {
+    var y = window.scrollY, r = document.getElementById('review'); r.textContent = '';
+    var lh = META.lighthouse, lhPages = (lh.pages || []).filter(function (p) { return p.ran; });
+    r.appendChild(el('h1', { text: 'Review: ' + META.host }));
+    r.appendChild(el('p', { class: 'muted', text: 'Scanned ' + META.date + '. ' + META.pages.length + ' page(s) read, ' + lhPages.length + ' tested with Lighthouse.' }));
+
+    var how = el('div', { class: 'box' }, el('h3', { text: 'How this page works' }));
+    var ol = el('ol', { class: 'steps' });
+    ['The scanner has done the finding. Each result is tagged "Scanner is confident" or "Your call: verify first".',
+     'Anything tagged "Your call" stays out of the report until you have looked and said yes.',
+     'The hands-on checks need a person. Do them, or mark them as not checked.',
+     'Write the summary in your own words, then open "Client report" and print or download it.'].forEach(function (t) { ol.appendChild(el('li', { text: t })); });
+    how.appendChild(ol);
+    how.appendChild(el('p', { class: 'muted', text: 'Click any title, "why" or "fix" text to reword it. Print and download stay locked until every decision is made. Your decisions are saved in this browser as you go. Save them to a file to keep a backup or to carry on in another browser.' }));
+    how.appendChild(el('div', { class: 'row', style: 'margin-top:0' },
+      el('button', { type: 'button', class: 'btn quiet', text: 'Save decisions to file', onclick: function () {
+        saveFile('decisions-' + META.host + '-' + META.stamp + '.json', JSON.stringify({ host: META.host, stamp: META.stamp, state: S }, null, 2), 'application/json'); } }),
+      el('button', { type: 'button', class: 'btn quiet', text: 'Load decisions from file', onclick: function () { document.getElementById('loadfile').click(); } })));
+    r.appendChild(how);
+
+    if (DATA.gaps.length) r.appendChild(el('div', { class: 'box call' }, el('h3', { text: 'The scan could not cover everything' }), list(DATA.gaps)));
+
+    var tiles = el('div', { class: 'tiles' });
+    var conf = DATA.findings.filter(function (f) { return f.confidence === 'confirmed'; }).length;
+    [[conf, 'confident findings'], [DATA.findings.length - conf, 'need your call'], [DATA.manual.length, 'hands-on checks']].forEach(function (t) { tiles.appendChild(el('div', { class: 'tile' }, el('b', { text: String(t[0]) }), t[1])); });
+    r.appendChild(tiles);
+
+    var info = el('div', { class: 'box' }, el('h3', { text: 'For your eyes only' }));
+    if (META.platform) info.appendChild(el('p', {}, el('strong', { text: 'Built with: ' + META.platform.name + '. ' }), META.platform.note));
+    if (lhPages.length) {
+      var tb = el('table', { class: 'lh' }, el('tr', {}, el('th', { text: 'Page' }), el('th', { text: 'Accessibility' }), el('th', { text: 'Speed' }), el('th', { text: 'Main content appears' }), el('th', { text: 'Page size' })));
+      lhPages.forEach(function (p) { tb.appendChild(el('tr', {}, el('td', { text: p.page }), el('td', { text: p.scores.accessibility + '/100' }), el('td', { text: p.scores.performance + '/100' }), el('td', { text: p.metrics['Main content appears'] || '' }), el('td', { text: p.metrics['Page size'] || '' }))); });
+      info.appendChild(tb);
+      info.appendChild(el('p', { class: 'muted', style: 'margin:10px 0 0', text: 'Lighthouse scores are a rough guide from a simulated phone. They are not shown in the client report.' }));
+    }
+    r.appendChild(info);
+
+    if (CMP) {
+      var cb = el('div', { class: 'box' }, el('h3', { text: 'Compared with the scan on ' + CMP.since }));
+      cb.appendChild(el('p', { text: CMP.fixed.length + ' no longer found, ' + CMP.still.length + ' still there, ' + CMP.new.length + ' new.' }));
+      if (CMP.fixed.length) {
+        cb.appendChild(el('p', { class: 'muted', text: 'Tick the ones to list as fixed in the client report. Untick anything you never reported to the client. The comparison covers scanner findings only, not your hands-on checks.' }));
+        CMP.fixed.forEach(function (x) {
+          var c = el('input', { type: 'checkbox', id: 'fx-' + x.id, onchange: function (e) { if (e.target.checked) delete S.hideFixed[x.id]; else S.hideFixed[x.id] = true; save(); } });
+          c.checked = !S.hideFixed[x.id];
+          cb.appendChild(el('p', { style: 'margin:4px 0' }, c, el('label', { for: 'fx-' + x.id, text: ' ' + x.title })));
+        });
+      }
+      r.appendChild(cb);
+    }
+
+    r.appendChild(el('h2', { text: 'Step 1: Scanner findings' }));
+    if (!DATA.findings.length) r.appendChild(el('p', { text: 'The scanner found nothing to flag. The hands-on checks below matter even more.' }));
+    DATA.findings.forEach(function (f) { r.appendChild(findingCard(f)); });
+
+    r.appendChild(el('h2', { text: 'Step 2: Hands-on checks' }));
+    r.appendChild(el('p', { class: 'muted', text: 'No scanner can do these. They take about fifteen minutes in total and are what makes the review worth paying for.' }));
+    DATA.manual.forEach(function (m) { r.appendChild(manualCard(m)); });
+
+    r.appendChild(el('h2', { text: 'Step 3: Your summary' }));
+    var ok = S.summaryOk && S.summary.trim();
+    var sum = el('div', { class: 'card ' + (ok ? 'kept' : 'pending'), 'data-pending': ok ? null : '1' });
+    sum.appendChild(el('span', { class: 'tag call', text: 'Only you can do this' }));
+    sum.appendChild(el('label', { class: 'field', for: 'summary', text: 'Opening paragraph of the report' }));
+    var ta = el('textarea', { id: 'summary', oninput: function (e) { S.summary = e.target.value; save(); } }); ta.value = S.summary; sum.appendChild(ta);
+    sum.appendChild(el('div', { class: 'row' },
+      el('button', { type: 'button', class: 'btn quiet', text: 'Write a starting draft from my decisions', onclick: function () { S.summary = draftSummary(); S.summaryOk = false; save(); renderReview(); } })));
+    var sc = el('input', { type: 'checkbox', id: 'sumok', onchange: function (e) { S.summaryOk = e.target.checked; save(); renderReview(); } }); sc.checked = S.summaryOk;
+    sum.appendChild(el('p', { style: 'margin:12px 0 0' }, sc, el('label', { for: 'sumok', text: ' I have read this and it says what I think.' })));
+    r.appendChild(sum);
+
+    var extra = el('div', { class: 'box' }, el('h3', { text: 'Optional details' }));
+    [['by', 'Prepared by'], ['contact', 'Your contact details']].forEach(function (p) {
+      extra.appendChild(el('label', { class: 'field', for: 'x-' + p[0], text: p[1] }));
+      var i = el('input', { type: 'text', id: 'x-' + p[0], oninput: function (e) { S[p[0]] = e.target.value; save(); } }); i.value = S[p[0]]; extra.appendChild(i);
+    });
+    extra.appendChild(el('label', { class: 'field', for: 'x-quote', text: 'Your quote for fixes (left out of the report if empty)' }));
+    var q = el('textarea', { id: 'x-quote', oninput: function (e) { S.quote = e.target.value; save(); } }); q.value = S.quote; extra.appendChild(q);
+    r.appendChild(extra);
+
+    r.appendChild(el('h2', { text: 'Outreach draft' }));
+    var od = outreachDraft(), ob = el('div', { class: 'box' });
+    ob.appendChild(el('span', { class: 'tag call', text: 'Not part of the report' }));
+    if (od) {
+      ob.appendChild(el('p', { text: 'A first-contact email built from the most important confident finding you have kept. Reload the page to refresh it after rewording.' }));
+      var ot = el('textarea', { class: 'tall', id: 'outreach', 'aria-label': 'Outreach draft' }); ot.value = od; ob.appendChild(ot);
+      ob.appendChild(el('div', { class: 'row' }, el('button', { type: 'button', class: 'btn quiet', text: 'Copy to clipboard', onclick: function () {
+        ot.select(); try { navigator.clipboard.writeText(ot.value).then(function () { say('Outreach draft copied.'); }, function () { document.execCommand('copy'); say('Outreach draft copied.'); }); } catch (e) { document.execCommand('copy'); say('Outreach draft copied.'); } } })));
+      ob.appendChild(el('div', { class: 'yourcall' }, el('b', { text: 'Before you send: ' }), 'open the site and confirm the finding is real and still there. Add the person\'s name, your name and your postal address. Send it by hand, one at a time, and do not write again if they do not reply.'));
+    } else ob.appendChild(el('p', { text: 'There is no confident finding kept in the report, so there is nothing solid to open an email with.' }));
+    r.appendChild(ob);
+
+    window.scrollTo(0, y); updateProgress();
+  }
+
+  // ---- CLIENT REPORT ------------------------------------------------------
+  function renderClient() {
+    var c = document.getElementById('client'); c.textContent = '';
+    var kept = keptFindings(), lh = META.lighthouse, lhN = (lh.pages || []).filter(function (p) { return p.ran; }).length;
+    c.appendChild(el('h1', { text: 'Site usability review: ' + META.host }));
+    c.appendChild(el('p', { class: 'small', text: META.date + (S.by.trim() ? ' · Prepared by ' + S.by.trim() : '') }));
+    if (S.summary.trim()) c.appendChild(el('p', { text: S.summary.trim() }));
+
+    if (CMP) {
+      var fixed = CMP.fixed.filter(function (x) { return !S.hideFixed[x.id]; });
+      c.appendChild(el('h2', { text: 'Progress since ' + CMP.since }));
+      if (fixed.length) { c.appendChild(el('p', { text: 'These are no longer found:' })); c.appendChild(list(fixed.map(function (x) { return x.title; }))); }
+      else c.appendChild(el('p', { text: 'Nothing from the earlier review has been cleared yet.' }));
+    }
+    if (kept.length) {
+      c.appendChild(el('h2', { text: 'Where to start' }));
+      var ol = el('ol'); kept.slice(0, 3).forEach(function (f) { ol.appendChild(el('li', { text: f.title })); }); c.appendChild(ol);
+    }
+    if (DATA.positives.length) { c.appendChild(el('h2', { text: 'What is already working well' })); c.appendChild(list(DATA.positives)); }
+
+    var areas = [];
+    kept.forEach(function (f) { if (areas.indexOf(f.area) < 0) areas.push(f.area); });
+    areas.forEach(function (a) {
+      c.appendChild(el('h2', { text: a }));
+      kept.filter(function (f) { return f.area === a; }).forEach(function (f) {
+        var d = el('div', { class: 'finding' });
+        d.appendChild(el('h3', {}, f.title + '  ', el('span', { class: 'imp ' + f.severity, text: IMP[f.severity] })));
+        d.appendChild(el('p', {}, el('strong', { text: 'Why it matters: ' }), f.why));
+        d.appendChild(el('p', {}, el('strong', { text: 'How to fix it: ' }), f.fix));
+        if (f.evidence.length) { d.appendChild(el('p', { class: 'small', style: 'margin:0', text: 'Where I saw it:' })); d.appendChild(list(f.evidence, 'ev')); }
+        f.shots.forEach(function (sh) { var s = shotEl(sh); if (s) d.appendChild(s); });
+        c.appendChild(d);
+      });
+    });
+    if (!kept.length) c.appendChild(el('p', { text: 'I did not find anything on this site that I would spend money fixing.' }));
+
+    if (S.quote.trim()) { c.appendChild(el('h2', { text: 'If you would like me to fix these' })); c.appendChild(el('p', { class: 'quote', text: S.quote.trim() })); }
+
+    c.appendChild(el('h2', { text: 'How this review was done' }));
+    c.appendChild(el('p', { class: 'small', text: 'Pages looked at:' }));
+    c.appendChild(list(META.pages, 'ev'));
+    var did = ['An automated scan of the pages above for missing labels, picture descriptions, headings, broken links and phone settings.'];
+    if (lhN) did.push('A Google Lighthouse test of ' + (lhN === 1 ? 'the home page' : lhN + ' of those pages') + ' on a simulated phone, covering text contrast, tap-target size and loading speed.');
+    var skipped = [];
+    DATA.manual.forEach(function (m) { var r = ms(m).result; if (r === 'pass' || r === 'problem') did.push('By hand: ' + m.title.charAt(0).toLowerCase() + m.title.slice(1) + '.'); else skipped.push(m.title + '.'); });
+    c.appendChild(el('p', { class: 'small', style: 'margin-top:12px', text: 'What I did:' })); c.appendChild(list(did, 'ev'));
+    if (!lhN) skipped.push('Automated tests of text contrast, tap-target size and loading speed.');
+    DATA.gaps.forEach(function (g) { if (g.indexOf('Lighthouse') < 0 && g.indexOf('earlier scan') < 0) skipped.push(g); });
+    if (skipped.length) { c.appendChild(el('p', { class: 'small', style: 'margin-top:12px', text: 'Not covered:' })); c.appendChild(list(skipped, 'ev')); }
+    c.appendChild(el('p', { class: 'small', style: 'margin-top:16px', text: 'This is a practical usability review of a sample of pages. It is not a legal compliance audit and does not certify that the site meets any accessibility law or standard.' }));
+    if (S.contact.trim()) c.appendChild(el('p', { class: 'small', text: 'Questions: ' + S.contact.trim() }));
+  }
+
+  // ---- toolbar ------------------------------------------------------------
+  function mode(client) {
+    document.body.classList.toggle('client-mode', client);
+    document.getElementById('b-review').classList.toggle('on', !client);
+    document.getElementById('b-client').classList.toggle('on', client);
+    say('');
+    if (client) { renderClient(); window.scrollTo(0, 0); } else renderReview();
+  }
+  function firstPending() { mode(false); var p = document.querySelector('[data-pending]'); if (p) p.scrollIntoView({ block: 'center' }); }
+  function ready() {
+    var n = pendingCount();
+    if (!n) return true;
+    firstPending(); say('Not ready to send: ' + n + ' decision' + (n === 1 ? ' is' : 's are') + ' still open. The first one is highlighted below.');
+    return false;
+  }
+  document.getElementById('barsite').textContent = 'Review: ' + META.host;
+  document.title = 'Site usability review: ' + META.host;
+  document.getElementById('b-review').addEventListener('click', function () { mode(false); });
+  document.getElementById('b-client').addEventListener('click', function () { mode(true); });
+  document.getElementById('progress').addEventListener('click', firstPending);
+  document.getElementById('b-print').addEventListener('click', function () { if (ready()) { mode(true); window.print(); } });
+  document.getElementById('b-download').addEventListener('click', function () {
+    if (!ready()) return;
+    mode(true);
+    var doc = '<!DOCTYPE html>\n<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">' +
+      '<title>Site usability review: ' + META.host.replace(/[<>&]/g, '') + '</title><style>' + document.getElementById('css-shared').textContent + '</style></head>' +
+      '<body><div class="wrap"><main id="client">' + document.getElementById('client').innerHTML + '</main></div></body></html>';
+    saveFile('site-usability-review-' + META.host + '-' + META.stamp + '.html', doc, 'text/html');
+    say('Report downloaded as a single file you can email or open anywhere.');
+  });
+  document.getElementById('loadfile').addEventListener('change', function (e) {
+    var file = e.target.files[0]; if (!file) return;
+    var rd = new FileReader();
+    rd.onload = function () {
+      try {
+        var d = JSON.parse(rd.result);
+        if (!d || !d.state || d.host !== META.host) { say('That file is not a decisions file for ' + META.host + '. Nothing was loaded.'); return; }
+        adopt(d.state); save(); mode(false);
+        say('Decisions loaded' + (d.stamp !== META.stamp ? ' from the scan dated ' + d.stamp + '. Check them against this scan.' : '.'));
+      } catch (err) { say('That file could not be read. Nothing was loaded.'); }
+    };
+    rd.readAsText(file); e.target.value = '';
+  });
+  mode(false);
+})();
+</script>
+</body>
+</html>
